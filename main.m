@@ -20,15 +20,15 @@ q = 0.5 * rho * norm(V).^2; %Dynamic pressure
 N_circ = 20; % Elements along the circumference
 N_lenT = 50; % Elements along the axis (Target, not exact, see geometry_func for explanation)
 L = [2 6 4 5]; % Vector of sections lengths (see geometry_func)
-D = [0 1 1 2 2]; % Vector of section diameters (see geometry_func)
+Diam = [0 1 1 2 2]; % Vector of section diameters (see geometry_func)
 
-% D always has one more element than L
+% Diam always has one more element than L
 
 % x y z are the coordinates of the mesh midpoints
 % N is the vector containing the number of elements
 % for each section
 
-[x,y,z,N] = geometry_func(L,D,N_circ,N_lenT);
+[x,y,z,N] = geometry_func(L,Diam,N_circ,N_lenT);
 
 
 N_len=sum(N); % Real number of elements along the axis
@@ -121,13 +121,13 @@ NORM_RES = reshape(NORM,[3,N_len,N_circ]);
 % of panel along the axis, the first row corresponds to the bottom
 % panels, while the last row are the tip panels
 
-% Forces calculation
+% Resultant of forces calculation
 for i = 1:length(cp)
-  dF(:,i) = -cp(i) * q * AREA(i) * NORM(:,i);
+  dF_tot(:,i) = -cp(i) * q * AREA(i) * NORM(:,i);
 end
 
 % Sum of the forces
-F_tot = sum(dF,2)
+F_tot = sum(dF_tot,2)
 
 
 % Plot of the panels
@@ -172,9 +172,27 @@ DRAG = dot(versV,F_tot);
 
 % Forces on sections calculation
 
-for p=1:length(N)
+prevN = 0; % Number of panel layers underneath the one we're considering
 
-  for i = 1:length(CP(1,:))
-    dF(:,i) = -cp(i) * q * AREA(i) * NORM(:,i);
+for p=1:length(N) % p = section number
+  for j=1:N_circ % j = along the circumference
+    for i = 1:N(p) % i = along the length
+      dF(:,i+prevN,j) = -CP(i+prevN,j) * q * AREA_RES(i+prevN,j) * NORM_RES(:,i+prevN,j);
+    end
   end
+  prevN = prevN + N(p);
+
+% Successive buildup
+F(:,p) = sum(dF,[2 3]);
+
 end
+
+% Extract the forces on the components
+for b = 1:3
+  F(:,b+1) = F(:,b+1) - sum(F(:,1:b),2);
+end
+
+% Flip the vector for consistency with the numbering used so far
+
+% F = Vector of forces on the components
+F = fliplr(F)

@@ -1,35 +1,35 @@
-function [x,y,z,N] = geom(L,D,N_circ,N_lenT)
+function [x,y,z,N] = geom(L,Diam,N_circ,N_lenT)
 
 % Sections are numbered starting from the tip of the rocket onward
 % For example a 4-section rocket would be
 %
 %
-%             ^  <-- D(1) (= 0)
+%             ^  <-- Diam(1) (= 0)
 %   L(1)    /   \
 %          /  1  \
-%         --------- D(2)
+%         --------- Diam(2)
 %         |       |
 %         |       |
 %   L(2)  |   2   |
 %         |       |
 %         |       |
 %         |       |
-%         ---------    D(3)
+%         ---------    Diam(3)
 %        /         \
 % L(3)  /     3     \
 %      /             \
-%      ---------------   D(4)
+%      ---------------   Diam(4)
 %     |               |
 %     |               |
 %     |               |
 % L(4)|       4       |
 %     |               |
 %     |               |
-%       -------------     D(5)
+%       -------------     Diam(5)
 %
 %
 %
-% This script is modular, just add more numbers to the array L(), D()
+% This script is modular, just add more numbers to the array L(), Diam()
 % to add sections
 %
 %
@@ -60,14 +60,14 @@ N_lenR = sum(N);
 R_dis=[];
 for j = 1:q-1 % j = section
   for i = 1:N(j)
-    R(j,i) = D(j)/2 + (D(j+1) - D(j))/(2 * N(j))  * (i-1);
+    R(j,i) = Diam(j)/2 + (Diam(j+1) - Diam(j))/(2 * N(j))  * (i-1);
   end
  R_dis = [fliplr(R(j,1:N(j))) R_dis];
 end
 
 % Deal with last section separately to add an additional element
 for i=1:N(q)+1
-R(q,i) = D(q)/2 + (D(q+1) - D(q))/(2 * N(q))  * (i-1);
+R(q,i) = Diam(q)/2 + (Diam(q+1) - Diam(q))/(2 * N(q))  * (i-1);
 end
 
 R_dis = [fliplr(R(q,1:N(q)+1)) R_dis];
