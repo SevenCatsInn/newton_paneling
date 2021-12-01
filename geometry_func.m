@@ -66,14 +66,6 @@ end
 
 R_dis = [fliplr(R(q,1:N(q)+1)) R_dis];
 
-
-
-
-
-%R = 0.5*[1.5*ones(1,10) 1*ones(1,30) 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0 ];
-
-[x,y,z] = cylinder(R_dis,N_len);
+[x,y,z] = cylinder(R_dis,N_circ);
 
 z = sum(L)*z; %rescale the length
-
-% surf(x,y,z); axis equal

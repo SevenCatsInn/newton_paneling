@@ -16,15 +16,12 @@ V = [Vmag*sin(alpha) 0 -Vmag*cos(alpha)]' % Velocity vector
 
 q = 0.5 * rho * norm(V).^2; %Dynamic pressure
 
-L = 10; % Lenght of the rocket
-diam = 1; %Diameter of the rocket
+N_circ = 20;
+N_len = 50;
+L = [2 8];
+D = [0 1 1];
+[x,y,z] = geometry_func(L,D,N_circ,N_len);
 
-R = 0.5*[diam*ones(1,40) 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0 ];
-% Number of subdivision (1,N) along the axis
-
-
-[x,y,z] = cylinder(R,20); %Unit cylinder, number of subdivisions on circumference
-z=L*z; %Rescaling the height
 
 dim = size(x);
 NORM=[]; %normals
@@ -103,7 +100,7 @@ end
 
 % Shaping the cp for all the panels in the form of a matrix to
 % plot the colormap
-CP = reshape(cp,[49,20]);
+CP = reshape(cp,[50,20]);
 
 
 % Forces calculation
@@ -150,6 +147,3 @@ legend('','Velocity','Force','Normals')
 
 versV = V / norm(V);
 DRAG = dot(versV,F);
-
-% DRAG = q * (pi * D^2/4) * C_D
-C_D = DRAG/(q*pi*diam^2/4)
