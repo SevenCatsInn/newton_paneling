@@ -1,4 +1,4 @@
-function [x,y,z] = geom(L,D,N_circ,N_len)
+function [x,y,z,N_lenR] = geom(L,D,N_circ,N_lenT)
 
 % Sections are numbered starting from the tip of the rocket onward
 % For example a 4-section rocket would be
@@ -32,7 +32,12 @@ function [x,y,z] = geom(L,D,N_circ,N_len)
 % This script is modular, just add more numbers to the array L(), D()
 % to add sections
 %
-
+%
+%
+% Note: N_lenT is the target and N_lenR is the actual number
+% of elements along the axis, they might slightly differ as
+% the number of elements for each section must be a positive integer
+% and therefore some rounding is involved
 
 
 
@@ -43,11 +48,12 @@ L_tot = sum(L);
 % the length of that section
 q=length(L);
 
+
 for i = 1:q;
-  N(i) = fix(N_len*L(i)/sum(L));
+  N(i) = fix(N_lenT*L(i)/sum(L));
 end
 
-
+N_lenR = sum(N);
 
 
 % Write the distribution of radii R_dis

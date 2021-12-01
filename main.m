@@ -16,11 +16,15 @@ V = [Vmag*sin(alpha) 0 -Vmag*cos(alpha)]' % Velocity vector
 
 q = 0.5 * rho * norm(V).^2; %Dynamic pressure
 
-N_circ = 20;
-N_len = 50;
-L = [2 8];
-D = [0 1 1];
-[x,y,z] = geometry_func(L,D,N_circ,N_len);
+
+N_circ = 20; % Target elements along the circumference
+N_lenT = 50; % Target elements along the axis
+L = [2 8 5]; % Vector of stage/sections lengths (see geometry_func)
+D = [0 1 1 2]; % Vector of stage/section diameters (see geometry_func)
+
+
+
+[x,y,z,N_len] = geometry_func(L,D,N_circ,N_lenT);
 
 
 dim = size(x);
@@ -100,7 +104,7 @@ end
 
 % Shaping the cp for all the panels in the form of a matrix to
 % plot the colormap
-CP = reshape(cp,[50,20]);
+CP = reshape(cp,[N_len,N_circ]);
 
 
 % Forces calculation
@@ -117,7 +121,7 @@ Q = surf(x,y,z,CP); axis equal; hold on
 xlabel('X')
 ylabel('Y')
 zlabel('Z')
-colormap autumn
+colormap summer
 
 % Label of the colorbar
 n = colorbar;
