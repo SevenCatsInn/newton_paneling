@@ -1,4 +1,4 @@
-function [x,y,z,N_lenR] = geom(L,D,N_circ,N_lenT)
+function [x,y,z,N] = geom(L,D,N_circ,N_lenT)
 
 % Sections are numbered starting from the tip of the rocket onward
 % For example a 4-section rocket would be

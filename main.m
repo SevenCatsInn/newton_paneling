@@ -17,15 +17,21 @@ V = [Vmag*sin(alpha) 0 -Vmag*cos(alpha)]' % Velocity vector
 q = 0.5 * rho * norm(V).^2; %Dynamic pressure
 
 
-N_circ = 20; % Target elements along the circumference
-N_lenT = 50; % Target elements along the axis
-L = [2 8 5]; % Vector of stage/sections lengths (see geometry_func)
-D = [0 1 1 2]; % Vector of stage/section diameters (see geometry_func)
+N_circ = 20; % Elements along the circumference
+N_lenT = 50; % Elements along the axis (Target, not exact, see geometry_func for explanation)
+L = [2 6 4 5]; % Vector of sections lengths (see geometry_func)
+D = [0 1 1 2 2]; % Vector of section diameters (see geometry_func)
+
+% D always has one more element than L
+
+% x y z are the coordinates of the mesh midpoints
+% N is the vector containing the number of elements
+% for each section
+
+[x,y,z,N] = geometry_func(L,D,N_circ,N_lenT);
 
 
-
-[x,y,z,N_len] = geometry_func(L,D,N_circ,N_lenT);
-
+N_len=sum(N); % Real number of elements along the axis
 
 dim = size(x);
 NORM=[]; %normals
@@ -102,10 +108,18 @@ for i=1:length(NORM(1,:))
 
 end
 
+%%%%%% POST-PROCESSING %%%%%%
+
+% Reshaping the outputs of cp, area, normals
 % Shaping the cp for all the panels in the form of a matrix to
 % plot the colormap
 CP = reshape(cp,[N_len,N_circ]);
+AREA_RES = reshape(AREA,[N_len,N_circ]); % Reshaped matrix of areas
+NORM_RES = reshape(NORM,[3,N_len,N_circ]);
 
+% All the reshaped matrices have as columns the vertical columns
+% of panel along the axis, the first row corresponds to the bottom
+% panels, while the last row are the tip panels
 
 % Forces calculation
 for i = 1:length(cp)
@@ -113,7 +127,7 @@ for i = 1:length(cp)
 end
 
 % Sum of the forces
-F = sum(dF,2)
+F_tot = sum(dF,2)
 
 
 % Plot of the panels
@@ -121,13 +135,16 @@ Q = surf(x,y,z,CP); axis equal; hold on
 xlabel('X')
 ylabel('Y')
 zlabel('Z')
-colormap summer
+colormap jet
 
 % Label of the colorbar
 n = colorbar;
 n.Label.String = 'C_p';
 
+%set(gca,'ColorScale','log'); %Logarithmic colorbar
+
 % set(gca,'ColorScale','log') % Logarithmic color scale
+                              % use for improved resolution
 
 % Plot velocity vector (see help for quiver3)
 resc = 5e2; %rescaling factor
@@ -139,9 +156,9 @@ V=V*resc; %scale back to original
 resc = alpha_deg*1e4; % rescaling factor,
                       % we use alpha_deg because it works well
 
-F=F/resc; %rescale force magnitude just for the plot
-quiver3([0],[0],[5],[F(1)],[F(2)],[F(3)],'linewidth',2);
-F=F*resc; %scale back to original
+F_tot=F_tot/resc; %rescale force magnitude just for the plot
+quiver3([0],[0],[5],[F_tot(1)],[F_tot(2)],[F_tot(3)],'linewidth',2);
+F_tot=F_tot*resc; %scale back to original
 
 % Plot normals to faces
 %quiver3(CENT(1,:),CENT(2,:),CENT(3,:),NORM(1,:),NORM(2,:),NORM(3,:));
@@ -150,4 +167,14 @@ hold on;
 legend('','Velocity','Force','Normals')
 
 versV = V / norm(V);
-DRAG = dot(versV,F);
+DRAG = dot(versV,F_tot);
+
+
+% Forces on sections calculation
+
+for p=1:length(N)
+
+  for i = 1:length(CP(1,:))
+    dF(:,i) = -cp(i) * q * AREA(i) * NORM(:,i);
+  end
+end
