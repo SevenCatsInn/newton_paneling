@@ -64,9 +64,6 @@ for i = 1:q;
   N(i) = fix(N_len*L(i)/sum(L));
 end
 
-
-
-
 % Write the distribution of radii R_dis
 R_dis=[];
 for j = 1:q-1 % j = section
@@ -76,6 +73,7 @@ for j = 1:q-1 % j = section
  R_dis = [fliplr(R(j,1:N(j))) R_dis];
 end
 
+
 % Deal with last section separately to add an additional element
 for i=1:N(q)+1
 R(q,i) = D(q)/2 + (D(q+1) - D(q))/(2 * N(q))  * (i-1);
@@ -83,11 +81,6 @@ end
 
 R_dis = [fliplr(R(q,1:N(q)+1)) R_dis];
 
-
-
-
-
-%R = 0.5*[1.5*ones(1,10) 1*ones(1,30) 0.9 0.8 0.7 0.6 0.5 0.4 0.3 0.2 0.1 0 ];
 
 [x,y,z] = cylinder(R_dis,N_len);
 

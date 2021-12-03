@@ -19,8 +19,8 @@ q = 0.5 * rho * norm(V).^2; %Dynamic pressure
 
 N_circ = 20; % Elements along the circumference
 N_lenT = 50; % Elements along the axis (Target, not exact, see geometry_func for explanation)
-L = [2 6 4 5]; % Vector of sections lengths (see geometry_func)
-Diam = [0 1 1 2 2]; % Vector of section diameters (see geometry_func)
+L = [2 6 4 5 3]; % Vector of sections lengths (see geometry_func)
+Diam = [0 1 1 2 2 3 ]; % Vector of section diameters (see geometry_func)
 
 % Diam always has one more element than L
 
@@ -188,7 +188,7 @@ F(:,p) = sum(dF,[2 3]);
 end
 
 % Extract the forces on the components
-for b = 1:3
+for b = 1:length(L)-1
   F(:,b+1) = F(:,b+1) - sum(F(:,1:b),2);
 end
 
