@@ -19,8 +19,8 @@ q = 0.5 * rho * norm(V).^2; %Dynamic pressure
 
 N_circ = 20; % Elements along the circumference
 N_lenT = 50; % Elements along the axis (Target, not exact, see geometry_func for explanation)
-L = [2 6 4 5 3]; % Vector of sections lengths (see geometry_func)
-Diam = [0 1 1 2 2 3 ]; % Vector of section diameters (see geometry_func)
+L = [0.9 1.6 0.7007 4.064 0.7197 ]; % Vector of sections lengths (see geometry_func)
+Diam = [0 0.45 0.45 0.8255  0.8255 1.2604 ]; % Vector of section diameters (see geometry_func)
 
 % Diam always has one more element than L
 
@@ -132,6 +132,7 @@ F_tot = sum(dF_tot,2)
 
 % Plot of the panels
 Q = surf(x,y,z,CP); axis equal; hold on
+set(gcf, 'Position',  [100, 100, 700, 1000]);
 xlabel('X')
 ylabel('Y')
 zlabel('Z')
@@ -140,8 +141,6 @@ colormap jet
 % Label of the colorbar
 n = colorbar;
 n.Label.String = 'C_p';
-
-%set(gca,'ColorScale','log'); %Logarithmic colorbar
 
 % set(gca,'ColorScale','log') % Logarithmic color scale
                               % use for improved resolution
@@ -161,7 +160,7 @@ quiver3([0],[0],[5],[F_tot(1)],[F_tot(2)],[F_tot(3)],'linewidth',2);
 F_tot=F_tot*resc; %scale back to original
 
 % Plot normals to faces
-%quiver3(CENT(1,:),CENT(2,:),CENT(3,:),NORM(1,:),NORM(2,:),NORM(3,:));
+% quiver3(CENT(1,:),CENT(2,:),CENT(3,:),NORM(1,:),NORM(2,:),NORM(3,:));
 hold on;
 
 legend('','Velocity','Force','Normals')
@@ -174,25 +173,34 @@ DRAG = dot(versV,F_tot);
 
 prevN = 0; % Number of panel layers underneath the one we're considering
 
-for p=1:length(N) % p = section number
+% Important note: CP, NORM_RES and AREA_RES are built from the ground up
+% while N() proceeds from the tip to the ground, meaning that we'll
+% flip N to compute the forces, iterating from the ground up.
+
+Nflip=fliplr(N);
+
+for p=1:length(Nflip) % p = section number
+
   for j=1:N_circ % j = along the circumference
-    for i = 1:N(p) % i = along the length
+
+    for i = 1:Nflip(p) % i = along the length
       dF(:,i+prevN,j) = -CP(i+prevN,j) * q * AREA_RES(i+prevN,j) * NORM_RES(:,i+prevN,j);
     end
+
   end
-  prevN = prevN + N(p);
 
-% Successive buildup
-F(:,p) = sum(dF,[2 3]);
+  prevN = prevN + Nflip(p); % Update the prevN for next iteration
+
+% Need to recover the beginning vertical panel of that section,
+% since we updated prevN already for the next iteration
+% Here prevN is the end of the section (p) of this iteration
+% we create a new variable just for clarity
+
+endSec = prevN; % Vertical numbering of last panel of the p-th section
+begSec = prevN - Nflip(p) + 1; % Vertical numbering of first panel of the p-th section
+
+F(:,p) = sum(dF(:,begSec:endSec,:),[2,3]);
 
 end
 
-% Extract the forces on the components
-for b = 1:length(L)-1
-  F(:,b+1) = F(:,b+1) - sum(F(:,1:b),2);
-end
-
-% Flip the vector for consistency with the numbering used so far
-
-% F = Vector of forces on the components
-F = fliplr(F)
+F=fliplr(F) %Flip F to be consistent with the numbering (top to bottom)
